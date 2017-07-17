@@ -1,4 +1,5 @@
 lib
+*.log
 
 # intellij idea
 
