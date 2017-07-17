@@ -1,6 +1,4 @@
-package main.java.org.srad.textimager.redis;
-
-import main.java.org.srad.textimager.main;
+package main.java.org.srad.textimager.storage;
 
 import java.util.HashMap;
 
