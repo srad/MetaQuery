@@ -25,7 +25,7 @@ public class ParserProducer implements Runnable {
             } catch (XMLStreamReaderException e2) {
                 // Ignore xmi parse exceptions
             } catch (Exception e3) {
-                System.err.printf("ERROR: '%s' -> %s\n", files[i].getAbsoluteFile(), e3.getMessage());
+                System.err.printf("ERROR: file(%s): %s\n", files[i].getAbsoluteFile(), e3.getMessage());
             }
         }
     }

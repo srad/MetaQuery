@@ -5,15 +5,22 @@ import main.java.org.srad.textimager.reader.type.ElementTypes;
 
 import java.io.File;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 abstract public class AbstractParser {
 
     final private File file;
 
-    public AbstractParser(File file) { this.file = file; }
+    abstract public void parse() throws Exception;
 
-    public boolean isPoisonPill() { return false; }
+    abstract public String getDocumentId();
+
+    abstract public String getDocumentTitle();
+
+    abstract public Map<String, String> getDocumentMeta();
+
+    public AbstractParser(File file) { this.file = file; }
 
     private ElementTypes elements = new ElementTypes();
 
@@ -21,21 +28,17 @@ abstract public class AbstractParser {
         elements.add(type);
     }
 
+    public File getFile() { return file; }
+
+    public boolean isPoisonPill() { return false; }
+
     public ElementTypes getElements() {
-       return elements;
+        return elements;
     }
 
     public Stream<ElementType> filterType(Class<? extends ElementType> t) {
         return getElements()
-                .parallelStream()
+                .stream()
                 .filter(e -> e.getName().equals(t.getSimpleName()));
     }
-
-    abstract public void parse() throws Exception;
-
-    abstract public String getDocumentId();
-
-    abstract public Map<String, String> getDocumentMeta();
-
-    public File getFile() { return file; }
 }

@@ -1,6 +1,6 @@
 package main.java.org.srad.textimager.reader;
 
-import main.java.org.srad.textimager.app.AppConfig;
+import main.java.org.srad.textimager.CasImporterConfig;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -10,7 +10,7 @@ public class ParserConfig {
     final public String fileExtension;
     final public int fileLimit;
 
-    public ParserConfig(final BlockingQueue<AbstractParser> queue, final AppConfig config) {
+    public ParserConfig(final BlockingQueue<AbstractParser> queue, final CasImporterConfig config) {
         this.queue = queue;
         this.importFolder = config.importFolder;
         this.fileExtension = config.fileExtension;

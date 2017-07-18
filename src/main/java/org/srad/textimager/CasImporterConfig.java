@@ -1,27 +1,25 @@
-package main.java.org.srad.textimager.app;
+package main.java.org.srad.textimager;
 
-import main.java.org.srad.textimager.main;
-
-public class AppConfig {
+public class CasImporterConfig {
     final public String importFolder;
     final public int threadCount;
     final public int documentLimit;
     final public String fileExtension;
 
-    public AppConfig(final String importFolder) {
+    public CasImporterConfig(final String importFolder) {
         this(importFolder, 0);
     }
 
-    public AppConfig(final String importFolder, final int documentLimit) {
+    public CasImporterConfig(final String importFolder, final int documentLimit) {
         this(importFolder, documentLimit, Runtime.getRuntime().availableProcessors(), "xmi");
 
     }
 
-    public AppConfig(final String importFolder, final int documentLimit, final int threadCount) {
+    public CasImporterConfig(final String importFolder, final int documentLimit, final int threadCount) {
         this(importFolder, documentLimit, threadCount, "xmi");
     }
 
-    public AppConfig(final String importFolder, final int documentLimit, final int threadCount, final String fileExtension) {
+    public CasImporterConfig(final String importFolder, final int documentLimit, final int threadCount, final String fileExtension) {
         this.importFolder = importFolder;
         this.threadCount = threadCount;
         this.documentLimit = documentLimit;

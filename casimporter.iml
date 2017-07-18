@@ -10,5 +10,6 @@
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.1" level="project" />
     <orderEntry type="library" name="com.sparkjava:spark-core:2.1" level="project" />
     <orderEntry type="library" name="biz.paluch.redis:lettuce:5.0.0.Beta1" level="project" />
+    <orderEntry type="library" name="org.nutz:ssdb4j:9.4" level="project" />
   </component>
 </module>

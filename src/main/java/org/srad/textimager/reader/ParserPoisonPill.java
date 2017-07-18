@@ -22,6 +22,9 @@ public class ParserPoisonPill extends AbstractParser {
     }
 
     @Override
+    public String getDocumentTitle() { return null; }
+
+    @Override
     public Map<String, String> getDocumentMeta() {
         return null;
     }

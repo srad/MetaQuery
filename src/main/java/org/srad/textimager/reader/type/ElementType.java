@@ -3,6 +3,7 @@ package main.java.org.srad.textimager.reader.type;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.namespace.QName;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ abstract public class ElementType {
     final public String id;
     final public int begin;
     final public int end;
+
+    final public static String TypeSeparator = ">>>>";
 
     /** Lazy */
     private String extractedText = null;
@@ -46,7 +49,7 @@ abstract public class ElementType {
     public String getNormalizedText() { return getText().toLowerCase(); }
 
     public String getTextWithType() {
-        return String.format("%s(%s)", getClass().getSimpleName(), getNormalizedText());
+        return String.format("%s%s%s", getClass().getSimpleName(), TypeSeparator, getNormalizedText());
     }
 
     public String getTypeName() { return getClass().getSimpleName(); }

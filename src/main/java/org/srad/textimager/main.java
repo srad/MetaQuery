@@ -1,12 +1,10 @@
 package main.java.org.srad.textimager;
 
-import main.java.org.srad.textimager.app.App;
-import main.java.org.srad.textimager.app.AppConfig;
 import main.java.org.srad.textimager.net.Rest;
 
 public class main {
 
-    private static App app;
+    private static CasImporter app;
 
     private static Rest server;
 
@@ -26,7 +24,7 @@ public class main {
             }
 
             if (importFiles) {
-                app = new App(new AppConfig(importFolder));
+                app = new CasImporter(new CasImporterConfig(importFolder));
             }
         } catch (Exception e) {
             e.printStackTrace();

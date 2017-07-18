@@ -1,18 +1,14 @@
 package main.java.org.srad.textimager.storage;
 
-import java.util.HashMap;
-
 /**
- * Redis Key name mangement
+ * KV-Storage keys
  */
 public class Key {
-    final public static String DocSofaToDocId = create("doc", "id", "sofa");
+    final public static String DocCount = create("doc", "count", "total");
 
     final public static String DocTitle = create("doc", "title");
 
-    final public static String DocContent = create("doc", "content");
-
-    final public static String TF_GLOBAL = create("count", "total", "tf");
+    final public static String TotalTf = create("doc", "count", "tf", "total");
 
     final public static String TotalLemmaCount = create("count", "total", "lemma");
 
@@ -20,11 +16,5 @@ public class Key {
 
     public static String create(String... args) {
         return String.join(":", args).toLowerCase();
-    }
-
-    public static <U, V> HashMap<U, V>createMap(U key, V value) {
-        HashMap<U, V> map = new HashMap<>();
-        map.put(key, value);
-        return map;
     }
 }
