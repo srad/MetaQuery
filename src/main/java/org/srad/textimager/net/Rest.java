@@ -38,7 +38,27 @@ public class Rest {
 
     public void start() {
         port(CasImporterConfig.WebServerPort);
+        config();
         routes();
+    }
+
+    private void config() {
+        options("/*",
+                (request, response) -> {
+                    String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+                    if (accessControlRequestHeaders != null) {
+                        response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+                    }
+
+                    String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+                    if (accessControlRequestMethod != null) {
+                        response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+                    }
+
+                    return "OK";
+                });
+
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
     }
 
     private void routes() {
@@ -86,6 +106,7 @@ public class Rest {
 
     /**
      * Main route use reflection to show all possible routes.
+     *
      * @return
      */
     private static List<String> getRoutes() {
@@ -96,7 +117,7 @@ public class Rest {
             System.out.println(field.getName());
             try {
                 if (field.getName().startsWith("Route")) {
-                    routeFields.add((String)field.get(field));
+                    routeFields.add((String) field.get(field));
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
