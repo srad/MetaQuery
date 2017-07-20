@@ -100,4 +100,8 @@ public class RedisStorage {
 
         return union;
     }
+
+    public Long scard(String type, String text) throws ExecutionException, InterruptedException {
+        return (Long)connection.async().scard(Key.create("set", "union", type, text)).get();
+    }
 }
