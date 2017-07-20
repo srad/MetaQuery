@@ -35,9 +35,7 @@ public class Rest {
     }
 
     private void routes() {
-        final RedisHashAsyncCommands<String, String> hash = connection.async();
-
-        get(RouteDoc, (request, response) -> hash.hgetall(Key.docMetadata(request.params(":id"))).get(), gson::toJson);
+        get(RouteDoc, (request, response) -> storage.getDocs(request.params(":id").split(",")), gson::toJson);
 
         get(RoutePaginateDocIdAndTitle, (request, response) -> {
             final int offset = Integer.valueOf(request.params(":offset"));
