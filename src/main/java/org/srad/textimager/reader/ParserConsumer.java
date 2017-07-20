@@ -1,11 +1,8 @@
 package main.java.org.srad.textimager.reader;
 
 import main.java.org.srad.textimager.reader.type.*;
-import main.java.org.srad.textimager.storage.type.AbstractStorageCommand;
+import main.java.org.srad.textimager.storage.type.*;
 import main.java.org.srad.textimager.storage.Key;
-import main.java.org.srad.textimager.storage.type.DocumentCommand;
-import main.java.org.srad.textimager.storage.type.MapCommand;
-import main.java.org.srad.textimager.storage.type.SortedSetCommand;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -55,12 +52,15 @@ public class ParserConsumer implements Runnable {
                     storageQueue.put(new SortedSetCommand(keyDocCount, groupedByTextWithCount));
                 }
 
+                /*
+                // Global concurrent counter
                 parser.getElements()
                         .stream()
                         .collect(Collectors.groupingByConcurrent(ElementType::getTextWithType, Collectors.counting()))
                         .forEach((key, count) -> {
                             freqGlobal.compute(key, (key2, globalCount) -> globalCount == null ? count : globalCount + count);
                         });
+                        */
 
                 // Each element data storage (token, paragraph, sentence, lemma, ... except char, we do not store
                 // single character with an id. Characters are just for type system regularity within the elements list.
@@ -70,7 +70,8 @@ public class ParserConsumer implements Runnable {
                         .sequential()
                         .forEach(el -> {
                             try {
-                                storageQueue.put(new MapCommand<>(Key.create("doc", parser.getDocumentId(), el.getTypeName(), el.id), el.toMap()));
+                                storageQueue.put(new SetAddCommand(Key.create("set", "union", el.getTypeName(), el.getNormalizedText()), parser.getDocumentId()));
+                                //storageQueue.put(new MapCommand<>(Key.create("doc", parser.getDocumentId(), el.getTypeName(), el.id), el.toMap()));
                             } catch (Exception e) {
                                 System.err.println(e.getMessage());
                             }

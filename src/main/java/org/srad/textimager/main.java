@@ -10,7 +10,7 @@ public class main {
 
     final private static boolean startServer = true;
 
-    final private static boolean importFiles = false;
+    final private static boolean importFiles = true;
 
     public static void main(String[] args) {
         try {
