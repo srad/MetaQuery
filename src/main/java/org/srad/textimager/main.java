@@ -8,9 +8,9 @@ public class main {
 
     private static Rest server;
 
-    final private static boolean startServer = false;
+    final private static boolean startServer = true;
 
-    final private static boolean importFiles = true;
+    final private static boolean importFiles = false;
 
     public static void main(String[] args) {
         try {
@@ -21,6 +21,7 @@ public class main {
 
             if (startServer) {
                 server = new Rest();
+                server.start();
             }
 
             if (importFiles) {

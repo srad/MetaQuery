@@ -40,7 +40,7 @@ public class StorageConsumer extends AbstractConsumer {
 
     public StorageConsumer(ArrayBlockingQueue<AbstractStorageCommand> queue) {
         super(queue);
-        this.client = Config.createClient();
+        this.client = RedisStorage.createClient();
         this.connection = client.connect();
     }
 

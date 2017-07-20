@@ -1,39 +1,57 @@
 package main.java.org.srad.textimager.net;
 
 import com.google.gson.Gson;
+import com.lambdaworks.redis.*;
+import com.lambdaworks.redis.api.StatefulRedisConnection;
+import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
+import main.java.org.srad.textimager.CasImporterConfig;
+import main.java.org.srad.textimager.storage.Key;
+import main.java.org.srad.textimager.storage.redis.RedisStorage;
 
 import static spark.Spark.*;
 
 public class Rest {
     final public static String RouteDoc = "/doc/:id";
-    final public static String RouteDocGetByTimeWithLimit = "/doc/:id/:type/:limit";
+    final public static String RoutePaginateDocIdTypes = "/doc/:id/:type/:limit";
+    final public static String RoutePaginateDocIdAndTitle = "/doc/title/:limit/:offset";
+
+    final private RedisClient client;
+    final private StatefulRedisConnection<String, String> connection;
 
     final private static Gson gson = new Gson();
 
+    final RedisStorage storage;
+
+    public Rest() {
+        this.client = RedisStorage.createClient();
+        this.connection = this.client.connect();
+        storage = new RedisStorage(this.connection);
+    }
+
     public void start() {
-        port(8080);
+        port(CasImporterConfig.WebServerPort);
         routes();
     }
 
     private void routes() {
-        /*
-        get(RouteDoc, (request, response) -> storage.getHashSet(Key.create("doc", request.params(":id"), "meta")), gson::toJson);
+        final RedisHashAsyncCommands<String, String> hash = connection.async();
 
-        get(RouteDocGetByTimeWithLimit, (request, response) -> {
-            // Convert from jedis Tuple to SimpleEntry, for compatibility with java 5 they
-            // convert element name to bytes (numbers) instead of keeping it as a String
-            HashMap<String, Double> pairs = new HashMap<>();
-            String[] queryKeys = Arrays.stream(request.params(":id").split(","))
-                    .map(id -> Key.create("doc", id, request.params(":type")))
-                    .toArray(String[]::new);
+        get(RouteDoc, (request, response) -> hash.hgetall(Key.docMetadata(request.params(":id"))).get(), gson::toJson);
 
-            System.out.printf("GET: /doc/%s/%s/%s\n", request.params(":id"), request.params(":type"), request.params(":limit"));
-            System.out.println(String.join(", ", queryKeys));
+        get(RoutePaginateDocIdAndTitle, (request, response) -> {
+            final int offset = Integer.valueOf(request.params(":offset"));
+            final Long limit = Long.valueOf(request.params(":limit"));
 
-            return storage.getTops(queryKeys);
+            return storage.paginateTitles(offset, limit);
         }, gson::toJson);
-        */
 
+        get(RoutePaginateDocIdTypes, ((request, response) -> {
+            final String[] ids = request.params(":id").split(",");
+            final String type = request.params(":type");
+            final Long limit = Long.valueOf(request.params(":limit"));
+
+            return storage.unionScoredTypes(ids, type, limit);
+        }), gson::toJson);
     }
 
     public void stop() {

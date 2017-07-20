@@ -17,4 +17,16 @@ public class Key {
     public static String create(String... args) {
         return String.join(":", args).toLowerCase();
     }
+
+    public static String docMetadata(String id) {
+        return create("doc", id, "meta");
+    }
+
+    public static String docTypeCount(Long id, String type) {
+        return docTypeCount(String.valueOf(id), type);
+    }
+
+    public static String docTypeCount(String id, String type) {
+        return create("doc", id, "count", type);
+    }
 }

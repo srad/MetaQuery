@@ -8,7 +8,7 @@ import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
 import main.java.org.srad.textimager.reader.*;
 import main.java.org.srad.textimager.reader.type.ElementType;
 import main.java.org.srad.textimager.storage.Key;
-import main.java.org.srad.textimager.storage.redis.Config;
+import main.java.org.srad.textimager.storage.redis.RedisStorage;
 import main.java.org.srad.textimager.storage.type.AbstractStorageCommand;
 import main.java.org.srad.textimager.storage.type.PoisonPillCommand;
 import main.java.org.srad.textimager.storage.redis.StorageConsumer;
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -89,7 +88,7 @@ public class CasImporter {
 
     private void storeGlobalCounts() {
         final List<RedisFuture<?>> futures = new ArrayList<>();
-        final RedisClient client = Config.createClient();
+        final RedisClient client = RedisStorage.createClient();
         final StatefulRedisConnection connection = client.connect();
         final HashMap<String, String> map = new HashMap<>();
 
