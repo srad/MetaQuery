@@ -2,12 +2,14 @@ package main.java.org.srad.textimager.storage.redis;
 
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
+import com.lambdaworks.redis.api.async.RedisSetAsyncCommands;
 import main.java.org.srad.textimager.CasImporterConfig;
 import main.java.org.srad.textimager.storage.Key;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -59,5 +61,29 @@ public class RedisStorage {
         }
 
         return cursor.getMap();
+    }
+
+    public Set<String> unionSet(final String elemenType, String[] elements) throws InterruptedException, ExecutionException {
+        RedisSetAsyncCommands<String, String> cmd = connection.async();
+        for(int i=0; i < elements.length; i += 1) {
+            elements[i] = Key.createUnionElementType(elemenType, elements[i]);
+            System.out.println(elements[i]);
+        }
+        RedisFuture<Set<String>> future = cmd.sunion(elements);
+        future.await(60, TimeUnit.SECONDS);
+
+        return future.get();
+    }
+
+    public Set<String> intersectSet(final String elemenType, String[] elements) throws InterruptedException, ExecutionException {
+        RedisSetAsyncCommands<String, String> cmd = connection.async();
+        for(int i=0; i < elements.length; i += 1) {
+            elements[i] = Key.createUnionElementType(elemenType, elements[i]);
+            System.out.println(elements[i]);
+        }
+        RedisFuture<Set<String>> future = cmd.sinter(elements);
+        future.await(60, TimeUnit.SECONDS);
+
+        return future.get();
     }
 }

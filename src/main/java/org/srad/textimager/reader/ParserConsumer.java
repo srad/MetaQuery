@@ -70,7 +70,7 @@ public class ParserConsumer implements Runnable {
                         .sequential()
                         .forEach(el -> {
                             try {
-                                storageQueue.put(new SetAddCommand(Key.create("set", "union", el.getTypeName(), el.getNormalizedText()), parser.getDocumentId()));
+                                storageQueue.put(new SetAddCommand(Key.createUnionElementType(el.getTypeName(), el.getNormalizedText()), parser.getDocumentId()));
                                 //storageQueue.put(new MapCommand<>(Key.create("doc", parser.getDocumentId(), el.getTypeName(), el.id), el.toMap()));
                             } catch (Exception e) {
                                 System.err.println(e.getMessage());

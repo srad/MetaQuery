@@ -14,6 +14,7 @@ public class Rest {
     final public static String RouteDoc = "/doc/:id";
     final public static String RoutePaginateDocIdTypes = "/doc/:id/:type/:limit";
     final public static String RoutePaginateDocIdAndTitle = "/doc/title/:limit/:offset";
+    final public static String RouteSetOperation = "/doc/set/:operator/:type/:element";
 
     final private RedisClient client;
     final private StatefulRedisConnection<String, String> connection;
@@ -52,6 +53,21 @@ public class Rest {
 
             return storage.unionScoredTypes(ids, type, limit);
         }), gson::toJson);
+
+        get(RouteSetOperation, (request, response) -> {
+            final String[] elements = request.params(":element").split(",");
+            final String type = request.params(":type");
+            System.out.println(String.join(",", elements));
+
+            switch (request.params(":operator")) {
+                case "union":
+                    return storage.unionSet(type, elements);
+                case "intersect":
+                    return storage.intersectSet(type, elements);
+                default:
+                    throw new Exception("Operation not allowed");
+            }
+        }, gson::toJson);
     }
 
     public void stop() {

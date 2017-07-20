@@ -29,4 +29,8 @@ public class Key {
     public static String docTypeCount(String id, String type) {
         return create("doc", id, "count", type);
     }
+
+    public static String createUnionElementType(String typeName, String text) {
+        return Key.create("set", "union", typeName, text);
+    }
 }
