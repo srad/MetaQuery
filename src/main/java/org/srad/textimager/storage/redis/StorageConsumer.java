@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.storage.redis;
+package org.srad.textimager.storage.redis;
 
 import com.lambdaworks.redis.LettuceFutures;
 import com.lambdaworks.redis.RedisClient;
@@ -10,9 +10,9 @@ import com.lambdaworks.redis.api.async.RedisSetAsyncCommands;
 import com.lambdaworks.redis.api.async.RedisSortedSetAsyncCommands;
 import com.lambdaworks.redis.api.sync.RedisServerCommands;
 import com.lambdaworks.redis.api.sync.RedisSetCommands;
-import main.java.org.srad.textimager.storage.AbstractConsumer;
-import main.java.org.srad.textimager.storage.Key;
-import main.java.org.srad.textimager.storage.type.AbstractStorageCommand;
+import org.srad.textimager.storage.AbstractConsumer;
+import org.srad.textimager.storage.Key;
+import org.srad.textimager.storage.type.AbstractStorageCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,8 +1,8 @@
-package main.java.org.srad.textimager.reader;
+package org.srad.textimager.reader;
 
-import main.java.org.srad.textimager.reader.type.*;
-import main.java.org.srad.textimager.storage.type.*;
-import main.java.org.srad.textimager.storage.Key;
+import org.srad.textimager.reader.type.*;
+import org.srad.textimager.storage.type.*;
+import org.srad.textimager.storage.Key;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;

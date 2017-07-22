@@ -1,6 +1,6 @@
-package main.java.org.srad.textimager;
+package org.srad.textimager;
 
-import main.java.org.srad.textimager.net.Rest;
+import org.srad.textimager.net.Rest;
 
 public class main {
 
@@ -28,7 +28,9 @@ public class main {
                 app = new CasImporter(new CasImporterConfig(importFolder));
             }
         } catch (Exception e) {
+            server.stop();
             e.printStackTrace();
+            System.exit(1);
         }
     }
 

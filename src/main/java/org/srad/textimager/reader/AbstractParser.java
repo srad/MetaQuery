@@ -1,7 +1,7 @@
-package main.java.org.srad.textimager.reader;
+package org.srad.textimager.reader;
 
-import main.java.org.srad.textimager.reader.type.ElementType;
-import main.java.org.srad.textimager.reader.type.ElementTypes;
+import org.srad.textimager.reader.type.ElementType;
+import org.srad.textimager.reader.type.ElementTypes;
 
 import java.io.File;
 import java.util.Map;

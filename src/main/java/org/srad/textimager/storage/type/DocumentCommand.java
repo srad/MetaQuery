@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.storage.type;
+package org.srad.textimager.storage.type;
 
 import java.util.Map;
 

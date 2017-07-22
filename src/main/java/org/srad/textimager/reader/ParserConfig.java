@@ -1,6 +1,6 @@
-package main.java.org.srad.textimager.reader;
+package org.srad.textimager.reader;
 
-import main.java.org.srad.textimager.CasImporterConfig;
+import org.srad.textimager.CasImporterConfig;
 
 import java.util.concurrent.BlockingQueue;
 

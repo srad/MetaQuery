@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager;
+package org.srad.textimager;
 
 public class CasImporterConfig {
     final public String importFolder;

@@ -1,6 +1,6 @@
-package main.java.org.srad.textimager.storage;
+package org.srad.textimager.storage;
 
-import main.java.org.srad.textimager.storage.type.AbstractStorageCommand;
+import org.srad.textimager.storage.type.AbstractStorageCommand;
 
 import java.util.concurrent.ArrayBlockingQueue;
 

@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.reader.type;
+package org.srad.textimager.reader.type;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

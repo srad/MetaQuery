@@ -1,12 +1,12 @@
-package main.java.org.srad.textimager.net;
+package org.srad.textimager.net;
 
 import com.google.gson.Gson;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
-import main.java.org.srad.textimager.CasImporterConfig;
-import main.java.org.srad.textimager.storage.Key;
-import main.java.org.srad.textimager.storage.redis.RedisStorage;
+import org.srad.textimager.CasImporterConfig;
+import org.srad.textimager.storage.Key;
+import org.srad.textimager.storage.redis.RedisStorage;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

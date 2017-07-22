@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.storage.type;
+package org.srad.textimager.storage.type;
 
 abstract public class AbstractStorageCommand<T> {
     final public String key;

@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.storage;
+package org.srad.textimager.storage;
 
 /**
  * KV-Storage keys

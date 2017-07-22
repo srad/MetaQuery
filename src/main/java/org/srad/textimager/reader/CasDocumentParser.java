@@ -1,6 +1,6 @@
-package main.java.org.srad.textimager.reader;
+package org.srad.textimager.reader;
 
-import main.java.org.srad.textimager.reader.type.*;
+import org.srad.textimager.reader.type.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;

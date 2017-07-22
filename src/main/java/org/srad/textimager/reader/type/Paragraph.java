@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.reader.type;
+package org.srad.textimager.reader.type;
 
 import javax.xml.namespace.QName;
 

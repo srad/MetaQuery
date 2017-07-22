@@ -1,11 +1,11 @@
-package main.java.org.srad.textimager.storage.redis;
+package org.srad.textimager.storage.redis;
 
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
 import com.lambdaworks.redis.api.async.RedisSetAsyncCommands;
-import main.java.org.srad.textimager.CasImporterConfig;
-import main.java.org.srad.textimager.storage.Key;
+import org.srad.textimager.CasImporterConfig;
+import org.srad.textimager.storage.Key;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

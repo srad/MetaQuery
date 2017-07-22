@@ -1,4 +1,4 @@
-package main.java.org.srad.textimager.reader;
+package org.srad.textimager.reader;
 
 import com.sun.xml.internal.ws.streaming.XMLStreamReaderException;
 
