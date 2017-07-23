@@ -29,7 +29,7 @@ public class Token extends AbstractElement {
     private String morph;
     private String pos;
 
-    protected Token(String id, String begin, String end, String text, String lemma, String morph, String pos) {
+    public Token(String id, String begin, String end, String text, String lemma, String morph, String pos) {
         super(id, begin, end, text);
         this.lemma = lemma;
         this.morph = morph;
