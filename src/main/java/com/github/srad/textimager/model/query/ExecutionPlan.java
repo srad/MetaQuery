@@ -3,29 +3,57 @@ package com.github.srad.textimager.model.query;
 import java.util.HashMap;
 
 /**
- * Contains the execution time, query and the resultset of a query and maybe some additional meta
+ * Contains the execution time, query and the resultSet of a query and maybe some additional meta
  * data about a query as the application evolves.
  *
  * Result that is returned from {@link AbstractQueryExecutor#execute(String)} method.
  * @param <T>
  */
-final public class ExecutionPlan<T> {
+final public class ExecutionPlan<T, U> {
     final public T result;
-    final public long time;
+    final public U resultSet;
     final public String query;
+    public long time;
+    private boolean isCached;
+    private long cacheFetchTime;
 
-    public ExecutionPlan(final T result, final long time, final String query) {
+    public boolean isCached() {
+        return isCached;
+    }
+
+    public ExecutionPlan<T, U> setCached(boolean cached) {
+        isCached = cached;
+        return this;
+    }
+
+    public ExecutionPlan(final T result, final long time, final String query, final U resultSet) {
         this.result = result;
         this.time = time;
         this.query = query;
+        this.resultSet = resultSet;
     }
 
-    @Override
-    public String toString() {
-        return new HashMap<String, String>() {{
-            put("time", String.valueOf(time));
+    public HashMap<String, Object> toMap() {
+        return toMap(isCached());
+    }
+
+    public HashMap<String, Object> toMap(boolean isCached) {
+        // The #result object is not serialized to string, since it's typically complex
+        return new HashMap<String, Object>() {{
+            put("time", time);
             put("query", query);
-            put("result", result.toString());
-        }}.toString();
+            put("result", resultSet.toString());
+            put("cached", isCached);
+            put("cacheFetchTime", getCacheFetchTime());
+        }};
+    }
+
+    public long getCacheFetchTime() {
+        return cacheFetchTime;
+    }
+
+    public ExecutionPlan<T, U> setCacheFetchTime(long cacheFetchTime) {
+        this.cacheFetchTime = cacheFetchTime;
+        return this;
     }
 }

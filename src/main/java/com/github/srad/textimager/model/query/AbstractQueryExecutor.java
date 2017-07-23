@@ -4,29 +4,34 @@ package com.github.srad.textimager.model.query;
  * All queries must implement the {@link #executeImplementation(String)}
  * method and return a result of type T.
  */
-abstract public class AbstractQueryExecutor {
+abstract public class AbstractQueryExecutor<T, U> {
     /**
-     * Needs to be implemented by all objects that provide queries to the database.
+     * Implementation required by all objects that provide queries to the database.
      * @param query
-     * @param <T>
      * @return
      */
-    abstract protected <T> T executeImplementation(final String query);
+    abstract protected T executeImplementation(final String query);
+
+    /** Fetch the actual data from the result object. If it's already the resultset then return that.
+     * @param result
+     * @return
+     */
+    abstract protected U getResultSet(T result);
 
     /**
-     * Executes the actual query to the database.
+     * Wraps the database query into an {@link ExecutionPlan} to add additional information.
      * @param query
-     * @param <T>
      * @return
      */
-    public <T> ExecutionPlan<T> execute(final String query) {
+    public ExecutionPlan<T, U> execute(final String query) {
         long startTime = System.currentTimeMillis();
 
-        T result = executeImplementation(query);
+        T result = this.<T>executeImplementation(query);
+        U resultSet = this.<T, U>getResultSet(result);
 
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
 
-        return new ExecutionPlan<T>(result, elapsedTime, query);
+        return new ExecutionPlan<T, U>(result, elapsedTime, query, resultSet);
     }
 }

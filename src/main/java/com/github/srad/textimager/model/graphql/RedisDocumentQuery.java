@@ -4,7 +4,7 @@ import com.github.srad.textimager.model.type.Document;
 
 import java.util.List;
 
-public class RedisGraphQLDocumentQuery extends DocumentGraphQLQuery {
+public class RedisDocumentQuery extends DocumentSchema {
 
     @Override
     protected List<Document> getDocuments(String[] ids) {
