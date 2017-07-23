@@ -1,6 +1,7 @@
 package com.github.srad.textimager.storage.redis;
 
 import com.github.srad.textimager.CasImporterConfig;
+import com.github.srad.textimager.model.type.Document;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
@@ -14,6 +15,10 @@ import java.util.concurrent.TimeUnit;
 public class RedisStorage {
 
     final StatefulRedisConnection connection;
+
+    public RedisStorage() {
+        this(createClient().connect());
+    }
 
     public RedisStorage(final StatefulRedisConnection connection) {
         this.connection = connection;
@@ -88,14 +93,18 @@ public class RedisStorage {
         return future.get();
     }
 
-    public ArrayList<Map<String,String>> getDocs(String[] ids) throws ExecutionException, InterruptedException {
+    public ArrayList<Document> getDocs(String id) throws ExecutionException, InterruptedException {
+        return getDocs(new String[] {id});
+    }
+
+    public ArrayList<Document> getDocs(String[] ids) throws ExecutionException, InterruptedException {
         final RedisHashAsyncCommands<String, String> cmdHash = connection.async();
-        ArrayList<Map<String, String>> union = new ArrayList<>();
+        ArrayList<Document> union = new ArrayList<>();
 
         for (String id : ids) {
             final RedisFuture<Map<String, String>> future = cmdHash.hgetall(Key.docMetadata(id));
             future.await(60, TimeUnit.SECONDS);
-            union.add(future.get());
+            union.add(new Document(future.get()));
         }
 
         return union;
