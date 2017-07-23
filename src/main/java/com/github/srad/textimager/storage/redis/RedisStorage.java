@@ -2,6 +2,9 @@ package com.github.srad.textimager.storage.redis;
 
 import com.github.srad.textimager.CasImporterConfig;
 import com.github.srad.textimager.model.type.Document;
+import com.github.srad.textimager.model.type.Token;
+import com.github.srad.textimager.reader.type.ElementType;
+import com.github.srad.textimager.storage.AbstractStorage;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
@@ -12,22 +15,21 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class RedisStorage {
+public class RedisStorage extends AbstractStorage {
 
-    final StatefulRedisConnection connection;
+    final private RedisClient client;
+    final private StatefulRedisConnection connection;
 
     public RedisStorage() {
-        this(createClient().connect());
-    }
-
-    public RedisStorage(final StatefulRedisConnection connection) {
-        this.connection = connection;
+        this.client = RedisStorage.createClient();
+        this.connection = this.client.connect();
     }
 
     public static RedisClient createClient() {
         return RedisClient.create(new RedisURI("localhost", CasImporterConfig.ArdbPort, 10, TimeUnit.MINUTES));
     }
 
+    @Override
     public Object[] unionScoredTypes(final String[] ids, final String type, final Long limit) throws InterruptedException, ExecutionException {
         HashMap<String, Double> unionCount = new HashMap<>();
 
@@ -50,6 +52,7 @@ public class RedisStorage {
                 .toArray();
     }
 
+    @Override
     public Map<String, String> paginateTitles(final int offset, final Long limit) throws InterruptedException, ExecutionException {
         final ScanArgs scanArgs = ScanArgs.Builder.limit(limit);
 
@@ -66,6 +69,7 @@ public class RedisStorage {
         return cursor.getMap();
     }
 
+    @Override
     public Set<String> unionSet(final String elemenType, String[] elements) throws InterruptedException, ExecutionException {
         RedisSetAsyncCommands<String, String> cmd = connection.async();
         for (int i = 0; i < elements.length; i += 1) {
@@ -79,6 +83,7 @@ public class RedisStorage {
         return future.get();
     }
 
+    @Override
     public Set<String> intersectSet(final String elemenType, String[] elements) throws InterruptedException, ExecutionException {
         final RedisSetAsyncCommands<String, String> cmd = connection.async();
 
@@ -93,10 +98,12 @@ public class RedisStorage {
         return future.get();
     }
 
+    @Override
     public ArrayList<Document> getDocs(String id) throws ExecutionException, InterruptedException {
         return getDocs(new String[] {id});
     }
 
+    @Override
     public ArrayList<Document> getDocs(String[] ids) throws ExecutionException, InterruptedException {
         final RedisHashAsyncCommands<String, String> cmdHash = connection.async();
         ArrayList<Document> union = new ArrayList<>();
@@ -110,7 +117,47 @@ public class RedisStorage {
         return union;
     }
 
+    @Override
     public Long scard(String type, String text) throws ExecutionException, InterruptedException {
-        return (Long)connection.async().scard(Key.create("set", "union", type, text)).get();
+        return (Long) connection.async().scard(Key.create("set", "union", type, text)).get();
+    }
+
+    @Override
+    public String getElement(String documentId, String elementId, String elementKey, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
+        RedisHashAsyncCommands<String, String> cmd = connection.async();
+        return cmd.hget(Key.elementType(documentId, elementId, type), elementKey).get();
+    }
+
+    @Override
+    public Set<String> getElementIds(String documentId, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
+        RedisSetAsyncCommands<String, String> cmd = connection.async();
+        return cmd.smembers(Key.elementTypeIdSet(documentId, type)).get();
+    }
+
+    @Override
+    public ArrayList<Token> getElementTypes(String documentId, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
+        return null;
+        /*
+        final RedisHashAsyncCommands<String, String> cmdHash = connection.async();
+
+         connection.setAutoFlushCommands(false);
+
+        List<RedisFuture<?>> futures = new ArrayList<>();
+        ids.forEach(id -> {
+            futures.add(cmdHash.hgetall(Key.elementTypeIdSet(documentId, type)));
+        });
+
+        connection.flushCommands();
+
+        boolean result = LettuceFutures.awaitAll(5, TimeUnit.SECONDS,
+                futures.toArray(new RedisFuture[futures.size()]));
+*/
+    }
+
+    @Override
+    public void close() {
+        connection.flushCommands();
+        connection.close();
+        client.shutdown();
     }
 }
