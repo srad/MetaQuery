@@ -37,7 +37,7 @@ abstract public class AbstractParser {
 
     public Stream<ElementType> filterType(Class<? extends ElementType> t) {
         return getElements()
-                .stream()
+                .parallelStream()
                 .filter(e -> e.getName().equals(t.getSimpleName()));
     }
 }

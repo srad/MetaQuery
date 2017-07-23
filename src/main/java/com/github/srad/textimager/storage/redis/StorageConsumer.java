@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Notice the redis server will reach up to 16GB of memory usage for an full import of ~2GB of data.
@@ -36,7 +37,7 @@ public class StorageConsumer extends AbstractConsumer {
 
     final private List<RedisFuture<?>> futures = new ArrayList<>();
 
-    final private static int PipeSize = 100;
+    final private static int PipeSize = 400;
 
     public StorageConsumer(ArrayBlockingQueue<AbstractStorageCommand> queue) {
         super(queue);
@@ -92,7 +93,6 @@ public class StorageConsumer extends AbstractConsumer {
                         default:
                             System.err.printf("ERROR: Unknown storage object: %s\n", element.getClass().getSimpleName());
                     }
-
                 } catch (Exception e) {
                     System.err.printf("ERROR: StorageConsumer: %s\n", e.getMessage());
                 }
