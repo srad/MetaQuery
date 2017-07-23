@@ -1,6 +1,7 @@
 package com.github.srad.textimager;
 
 import com.github.srad.textimager.net.Rest;
+import com.github.srad.textimager.storage.redis.RedisStorage;
 
 public class main {
 
@@ -20,7 +21,7 @@ public class main {
             }
 
             if (startServer) {
-                server = new Rest();
+                server = new Rest(RedisStorage.class);
                 server.start();
             }
 
@@ -33,5 +34,4 @@ public class main {
             System.exit(1);
         }
     }
-
 }
