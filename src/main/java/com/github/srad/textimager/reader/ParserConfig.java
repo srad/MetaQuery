@@ -4,7 +4,7 @@ import com.github.srad.textimager.CasImporterConfig;
 
 import java.util.concurrent.BlockingQueue;
 
-public class ParserConfig {
+final public class ParserConfig {
     final public BlockingQueue<AbstractParser> queue;
     final public String importFolder;
     final public String fileExtension;

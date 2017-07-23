@@ -1,6 +1,6 @@
 package com.github.srad.textimager;
 
-public class CasImporterConfig {
+final public class CasImporterConfig {
     final public String importFolder;
     final public int threadCount;
     final public int documentLimit;
