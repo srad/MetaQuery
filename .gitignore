@@ -79,3 +79,5 @@ target/
 .scala_dependencies
 .worksheet
 
+# bower
+src/main/resources/public/js/vendor
