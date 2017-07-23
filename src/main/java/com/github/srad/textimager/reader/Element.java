@@ -16,5 +16,5 @@ final public class Element {
 
     final public static HashSet<String> acceptedElements = new HashSet<>(Arrays.asList(Element.Sofa, Element.DocumentMetaData, Element.Paragraph, Element.Lemma, Element.Sentence, Element.Token));
 
-    final public static HashSet<String> acceptedAttributes = new HashSet<>(Arrays.asList("sofa", "begin", "end", "value", "documentTitle", "documentId", "sofaString"));
+    final public static HashSet<String> acceptedAttributes = new HashSet<>(Arrays.asList("sofa", "begin", "end", "value", "documentTitle", "documentId", "sofaString", "pos", "morph", "lemma"));
 }

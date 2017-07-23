@@ -1,10 +1,11 @@
 package com.github.srad.textimager.reader.type;
 
 import javax.xml.namespace.QName;
+import java.util.HashMap;
 
 final public class Lemma extends ElementType {
-    public Lemma(final Sofa sofa, final String id, final String begin, final String end) {
-        super(sofa, id, begin, end);
+    public Lemma(final Sofa sofa, final HashMap<String, String> attr) {
+        super(sofa, attr);
     }
 
     public static QName getElementInfo() {

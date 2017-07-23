@@ -1,5 +1,6 @@
 package com.github.srad.textimager.reader.type;
 
+import com.google.gson.Gson;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.namespace.QName;
@@ -14,26 +15,19 @@ abstract public class ElementType {
 
     final public static String TypeSeparator = ">>>>";
 
+    final public HashMap<String, String> attr;
+
+    final Gson gson = new Gson();
+
     /** Lazy */
     private String extractedText = null;
 
-    public ElementType(final Sofa sofa, final String id, final String begin, final String end) {
-        this(sofa, id, Integer.valueOf(begin), Integer.valueOf(end));
-    }
-
-    public ElementType(final Sofa sofa, final String id, final int begin, final int end) {
+    public ElementType(final Sofa sofa, final HashMap<String, String> attr) {
+        this.attr = attr;
         this.sofa = sofa;
-        this.id = id;
-        this.begin = begin;
-        this.end = end;
-    }
-
-    public ElementType(final Sofa sofa, final String id, final int begin, final int end, String text) {
-        this.sofa = sofa;
-        this.id = id;
-        this.begin = begin;
-        this.end = end;
-        this.extractedText = text;
+        this.id = attr.get("id");
+        this.begin = Integer.valueOf(attr.get("begin"));
+        this.end = Integer.valueOf(attr.get("end"));
     }
 
     public String getText() {
@@ -59,12 +53,17 @@ abstract public class ElementType {
     public static QName getElementInfo() { throw new NotImplementedException(); }
 
     public Map<String, String> toMap() {
-        return new HashMap<String, String>() {{
+        // getId is lazy, becase the sofa element occurs late in xml stream
+        return new HashMap<String, String>()  {{
             put("sofa", sofa.getId());
-            put("id", id);
-            put("begin", String.valueOf(begin));
-            put("end", String.valueOf(end));
+            put("id", attr.get("id"));
+            put("begin", attr.get("begin"));
+            put("end", attr.get("end"));
             put("text", getText());
         }};
+    }
+
+    public String toJson() {
+        return gson.toJson(toMap());
     }
 }

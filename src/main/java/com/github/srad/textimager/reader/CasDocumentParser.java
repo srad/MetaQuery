@@ -75,8 +75,8 @@ public class CasDocumentParser extends AbstractParser {
                         for (Class<? extends ElementType> elementType : parsedElements) {
                             QName n = (QName) elementType.getMethod("getElementInfo").invoke(null);
                             if (name.equals(n)) {
-                                addElement(elementType.getDeclaredConstructor(Sofa.class, String.class, String.class, String.class)
-                                        .newInstance(sofa, attr.get("id"), attr.get("begin"), attr.get("end")));
+                                addElement(elementType.getDeclaredConstructor(Sofa.class, HashMap.class)
+                                        .newInstance(sofa, attr));
                             }
                         }
                     }
