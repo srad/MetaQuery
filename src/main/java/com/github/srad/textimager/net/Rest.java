@@ -1,44 +1,50 @@
 package com.github.srad.textimager.net;
 
 import com.github.srad.textimager.CasImporterConfig;
-import com.github.srad.textimager.storage.redis.RedisStorage;
+import com.github.srad.textimager.model.graphql.DocumentSchema;
+import com.github.srad.textimager.model.graphql.RedisDocumentQuery;
+import com.github.srad.textimager.model.query.ExecutionPlan;
+import com.github.srad.textimager.model.query.QueryManager;
+import com.github.srad.textimager.storage.AbstractStorage;
 import com.google.gson.Gson;
-import com.lambdaworks.redis.*;
-import com.lambdaworks.redis.api.StatefulRedisConnection;
+import graphql.ExecutionResult;
+import spark.SparkBase;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static spark.Spark.*;
 
-public class Rest {
+public class Rest<T extends AbstractStorage> {
+    final public static String RouteQueryDoc = "/doc/query/:query";
     final public static String RouteDoc = "/doc/:id";
     final public static String RoutePaginateDocIdTypes = "/doc/:id/:type/:limit";
     final public static String RoutePaginateDocIdAndTitle = "/doc/title/:limit/:offset";
     final public static String RouteSetOperation = "/set/:operator/:type/:text";
     final public static String RouteSetCard = "/set/card/:type/:text";
 
-    final private RedisClient client;
-    final private StatefulRedisConnection<String, String> connection;
+    final private T storage;
 
     final private static Gson gson = new Gson();
 
-    final RedisStorage storage;
+    final private DocumentSchema documentQuery = new RedisDocumentQuery();
 
-    public Rest() {
-        this.client = RedisStorage.createClient();
-        this.connection = this.client.connect();
-        storage = new RedisStorage(this.connection);
+    final QueryManager queryManager = new QueryManager();
+
+    public Rest(Class<T> clazz) throws IllegalAccessException, InstantiationException {
+        storage = clazz.newInstance();
     }
 
     public void start() {
-        port(CasImporterConfig.WebServerPort);
+        SparkBase.port(CasImporterConfig.WebServerPort);
         config();
         routes();
     }
 
     private void config() {
+        SparkBase.staticFileLocation("/public");
         options("/*",
                 (request, response) -> {
                     String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
@@ -59,7 +65,9 @@ public class Rest {
 
     private void routes() {
         // Documentation
-        get("/", ((request, response) -> getRoutes()), gson::toJson);
+        get("/explain", ((request, response) -> {
+            return getRoutes();
+        }));
 
         get(RouteDoc, (request, response) -> storage.getDocs(request.params(":id").split(",")), gson::toJson);
 
@@ -94,10 +102,24 @@ public class Rest {
                     throw new Exception("Operation not allowed");
             }
         }, gson::toJson);
+
+        get(RouteQueryDoc, (request, response) -> {
+            //{ document(id: [102154,1039887,1021125]) { id title token { text } } }
+            final String query = java.net.URLDecoder.decode(request.params(":query"), "UTF-8");
+            response.type("application/json");
+
+            ExecutionPlan<ExecutionResult, HashMap<String, String>> plan = queryManager.execute(documentQuery, query);
+
+            //System.out.println(query);
+            //System.out.println(plan.result.getErrors());
+
+            return plan;
+        }, gson::toJson);
     }
 
     public void stop() {
-        stop();
+        storage.close();
+        SparkBase.stop();
     }
 
     /**

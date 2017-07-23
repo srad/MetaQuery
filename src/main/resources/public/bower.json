@@ -1,0 +1,25 @@
+{
+  "name": "textimager-query",
+  "homepage": "https://github.com/srad/textimager",
+  "authors": [
+    "srad <ssedighi@posteo.de>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "spectre.css": "^0.2.14",
+    "requirejs": "^2.3.4",
+    "zepto": "^1.2.0",
+    "knockout": "knockoutjs#^3.4.2",
+    "jsoneditor": "^5.9.2"
+  }
+}
