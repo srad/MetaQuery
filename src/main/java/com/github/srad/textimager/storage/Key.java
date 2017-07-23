@@ -1,5 +1,7 @@
 package com.github.srad.textimager.storage;
 
+import com.github.srad.textimager.reader.type.ElementType;
+
 /**
  * KV-Storage keys
  */
@@ -32,5 +34,13 @@ public class Key {
 
     public static String createUnionElementType(String typeName, String text) {
         return Key.create("set", "union", typeName, text);
+    }
+
+    public static String elementTypeIdSet(String documentId, Class<? extends ElementType> type) {
+        return create("doc", documentId, "set", type.getSimpleName());
+    }
+
+    public static String elementType(String documentId, String elementId, Class<? extends ElementType> type) {
+        return create("doc", documentId, "element", type.getSimpleName(), elementId);
     }
 }
