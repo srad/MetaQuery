@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,12 +22,9 @@ public class ParserConsumer implements Runnable {
     final private BlockingQueue<AbstractParser> queue;
     final private BlockingQueue<AbstractStorageCommand> storageQueue;
 
-    final private ConcurrentMap<String, Long> freqGlobal;
-
-    public ParserConsumer(final BlockingQueue<AbstractParser> parserQueue, final ArrayBlockingQueue<AbstractStorageCommand> storageQueue, final ConcurrentMap<String, Long> freqGlobal) {
+    public ParserConsumer(final BlockingQueue<AbstractParser> parserQueue, final ArrayBlockingQueue<AbstractStorageCommand> storageQueue) {
         this.queue = parserQueue;
         this.storageQueue = storageQueue;
-        this.freqGlobal = freqGlobal;
     }
 
     public void run() {
@@ -47,31 +45,37 @@ public class ParserConsumer implements Runnable {
                     final String typeName = classType.getSimpleName();
 
                     // group by token, char, lemma, ... and count
-                    final Map<String, Long> groupedByTextWithCount = elements.collect(Collectors.groupingBy(ElementType::getNormalizedText, Collectors.counting()));
                     final String keyDocCount = Key.create("doc", parser.getDocumentId(), "count", typeName);
-
+                    final ConcurrentMap<String, Long> groupedByTextWithCount = parser.filterType(classType)
+                            .collect(Collectors.groupingByConcurrent(ElementType::getText, Collectors.counting()));
                     storageQueue.put(new SortedSetCommand(keyDocCount, groupedByTextWithCount));
-                }
 
-                /*
-                // Global concurrent counter
-                parser.getElements()
-                        .stream()
-                        .collect(Collectors.groupingByConcurrent(ElementType::getTextWithType, Collectors.counting()))
-                        .forEach((key, count) -> {
-                            freqGlobal.compute(key, (key2, globalCount) -> globalCount == null ? count : globalCount + count);
+                    // Add all elements to a set
+                    if (!classType.getSimpleName().equals(Char.class.getSimpleName())) {
+                        ConcurrentMap<String, List<ElementType>> groupedByTextWithElements = elements.collect(Collectors.groupingByConcurrent(ElementType::getText));
+                        groupedByTextWithElements.forEach((string, list) -> {
+                            list.forEach(elementInList -> {
+                                final String setOfIdsOfType = Key.create("doc", parser.getDocumentId(), "set", typeName);
+                                final String singleElementTypeData = Key.create("doc", parser.getDocumentId(), "element", typeName, elementInList.id);
+                                try {
+                                    storageQueue.put(new SetAddCommand(setOfIdsOfType, elementInList.id));
+                                    storageQueue.put(new MapCommand(singleElementTypeData, elementInList.toMap()));
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            });
                         });
-                        */
+                    }
+                }
 
                 // Each element data storage (token, paragraph, sentence, lemma, ... except char, we do not store
                 // single character with an id. Characters are just for type system regularity within the elements list.
                 parser.getElements()
                         .parallelStream()
                         .filter(e -> (!e.getClass().equals(Char.class)))
-                        .sequential()
                         .forEach(el -> {
                             try {
-                                storageQueue.put(new SetAddCommand(Key.createUnionElementType(el.getTypeName(), el.getNormalizedText()), parser.getDocumentId()));
+                                storageQueue.put(new SetAddCommand(Key.createUnionElementType(el.getTypeName(), el.getText()), parser.getDocumentId()));
                                 //storageQueue.put(new MapCommand<>(Key.create("doc", parser.getDocumentId(), el.getTypeName(), el.id), el.toMap()));
                             } catch (Exception e) {
                                 System.err.println(e.getMessage());

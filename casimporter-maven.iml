@@ -14,5 +14,9 @@
     <orderEntry type="library" name="com.sparkjava:spark-core:2.1" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.1" level="project" />
     <orderEntry type="library" name="biz.paluch.redis:lettuce:5.0.0.Beta1" level="project" />
+    <orderEntry type="library" name="com.graphql-java:graphql-java:3.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.graphql-java:graphql-java:3.0.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.antlr:antlr4-runtime:4.5.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
   </component>
 </module>
