@@ -1,10 +1,17 @@
 package com.github.srad.textimager.model.query;
 
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
+
 /**
  * All queries must implement the {@link #executeImplementation(String)}
  * method and return a result of type T.
  */
 abstract public class AbstractQueryExecutor<T, U> {
+
+    /** For query-plan fetch iterations */
+    private AtomicLong iterations = new AtomicLong();
+
     /**
      * Implementation required by all objects that provide queries to the database.
      * @param query
@@ -25,6 +32,7 @@ abstract public class AbstractQueryExecutor<T, U> {
      */
     public ExecutionPlan<T, U> execute(final String query) {
         long startTime = System.currentTimeMillis();
+        iterations.set(0);
 
         T result = this.<T>executeImplementation(query);
         U resultSet = this.<T, U>getResultSet(result);
@@ -32,6 +40,12 @@ abstract public class AbstractQueryExecutor<T, U> {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
 
-        return new ExecutionPlan<T, U>(result, elapsedTime, query, resultSet);
+        return new ExecutionPlan<T, U>(result, elapsedTime, query, resultSet, iterations.longValue());
+    }
+
+    /** All loop and callbacks can use this functional wrapper to get counted within the query-plan. */
+    protected <A> A fetch(Supplier<A> fetcher) {
+        iterations.incrementAndGet();
+        return fetcher.get();
     }
 }

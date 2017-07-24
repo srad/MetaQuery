@@ -21,7 +21,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
 
     private GraphQL graph;
 
-    protected static RedisStorage service = new RedisStorage();
+    protected RedisStorage service = new RedisStorage();
 
     public DocumentSchema() {
         GraphQLObjectType tokenType = GraphQLObjectType.newObject()
@@ -29,15 +29,15 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
                 .field(newFieldDefinition()
                         .name("text")
                         .type(GraphQLString)
-                        .dataFetcher(env -> getElementField(env, "text", Token.class)))
+                        .dataFetcher(env -> fetch(() -> getElementField(env, "text", Token.class))))
                 .field(newFieldDefinition()
                         .name("begin")
                         .type(GraphQLString)
-                        .dataFetcher(env -> getElementField(env, "begin", Token.class)))
+                        .dataFetcher(env -> fetch(() -> getElementField(env, "begin", Token.class))))
                 .field(newFieldDefinition()
                         .name("end")
                         .type(GraphQLString)
-                        .dataFetcher(env -> getElementField(env, "end", Token.class)))
+                        .dataFetcher(env -> fetch(() -> getElementField(env, "end", Token.class))))
                 .build();
 
         GraphQLObjectType docType = newObject()
@@ -54,7 +54,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
                 .field(newFieldDefinition()
                         .name("token")
                         .type(new GraphQLList(tokenType))
-                        .dataFetcher(env -> {
+                        .dataFetcher(env -> fetch(() -> {
                             try {
                                 Document doc = (Document) env.getSource();
                                 Set<String> ids = service.getElementIds(doc.getId(), com.github.srad.textimager.reader.type.Token.class);
@@ -70,7 +70,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
                             } catch (Exception e) {
                                 return e.getMessage();
                             }
-                        }))
+                        })))
                 .build();
 
         GraphQLObjectType root = GraphQLObjectType.newObject()
@@ -90,7 +90,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
                                 .name("offset")
                                 .type(GraphQLInt)
                                 .build())
-                        .dataFetcher(env -> fetchDocument(env))
+                        .dataFetcher(env -> fetch(() -> fetchDocument(env)))
                         .build())
                 .build();
 

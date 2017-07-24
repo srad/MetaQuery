@@ -16,6 +16,7 @@ require([
         this.time = ko.observable("");
         this.isCached = ko.observable("");
         this.cacheFetchTime = ko.observable("");
+        this.iterations = ko.observable("");
     }
 
     var queryPlan = new ViewModelQueryPlan();
@@ -44,6 +45,7 @@ require([
                     queryPlan.time(response.time + "ms");
                     queryPlan.isCached(response.isCached);
                     queryPlan.cacheFetchTime(response.cacheFetchTime + "ms");
+                    queryPlan.iterations(response.iterations);
                     editor.set(response.result.data);
                 } else {
                     queryPlan.time("");

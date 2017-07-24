@@ -13,6 +13,7 @@ final public class ExecutionPlan<T, U> {
     final public T result;
     final public U resultSet;
     final public String query;
+    final public long iterations;
     public long time;
     private boolean isCached;
     private long cacheFetchTime;
@@ -26,11 +27,12 @@ final public class ExecutionPlan<T, U> {
         return this;
     }
 
-    public ExecutionPlan(final T result, final long time, final String query, final U resultSet) {
+    public ExecutionPlan(final T result, final long time, final String query, final U resultSet, final long iterations) {
         this.result = result;
         this.time = time;
         this.query = query;
         this.resultSet = resultSet;
+        this.iterations = iterations;
     }
 
     public HashMap<String, Object> toMap() {
@@ -52,7 +54,7 @@ final public class ExecutionPlan<T, U> {
         return cacheFetchTime;
     }
 
-    public ExecutionPlan<T, U> setCacheFetchTime(long cacheFetchTime) {
+    public ExecutionPlan setCacheFetchTime(long cacheFetchTime) {
         this.cacheFetchTime = cacheFetchTime;
         return this;
     }
