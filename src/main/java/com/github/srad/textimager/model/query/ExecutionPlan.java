@@ -39,13 +39,18 @@ final public class ExecutionPlan<T, U> {
         return toMap(isCached());
     }
 
+    /**
+     * Only expose selected fields as data that shall be passed around.
+     * @param isCached
+     * @return
+     */
     public HashMap<String, Object> toMap(boolean isCached) {
-        // The #result object is not serialized to string, since it's typically complex
         return new HashMap<String, Object>() {{
+            put("resultSet", resultSet);
             put("time", time);
             put("query", query);
-            put("result", resultSet.toString());
-            put("cached", isCached);
+            put("iterations", iterations);
+            put("isCached", isCached());
             put("cacheFetchTime", getCacheFetchTime());
         }};
     }
