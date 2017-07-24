@@ -32,7 +32,7 @@ require([
             "{",
             "  document(id: [102154,1039887,1021125]) {",
             "    id title token {",
-            "      text",
+            "      text begin end",
             "    }",
             "  }",
             "}"].join("\n");
@@ -46,7 +46,7 @@ require([
                     queryPlan.isCached(response.isCached);
                     queryPlan.cacheFetchTime(response.cacheFetchTime + "ms");
                     queryPlan.iterations(response.iterations);
-                    editor.set(response.result.data);
+                    editor.set(response.resultSet);
                 } else {
                     queryPlan.time("");
                     queryPlan.isCached("");

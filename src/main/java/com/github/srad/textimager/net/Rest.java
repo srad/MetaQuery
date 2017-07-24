@@ -3,16 +3,14 @@ package com.github.srad.textimager.net;
 import com.github.srad.textimager.CasImporterConfig;
 import com.github.srad.textimager.model.graphql.DocumentSchema;
 import com.github.srad.textimager.model.graphql.RedisDocumentQuery;
-import com.github.srad.textimager.model.query.ExecutionPlan;
 import com.github.srad.textimager.model.query.QueryManager;
 import com.github.srad.textimager.storage.AbstractStorage;
 import com.google.gson.Gson;
-import graphql.ExecutionResult;
+import com.google.gson.GsonBuilder;
 import spark.SparkBase;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static spark.Spark.*;
@@ -27,7 +25,7 @@ public class Rest<T extends AbstractStorage> {
 
     final private T storage;
 
-    final private static Gson gson = new Gson();
+    final private static Gson gson = new GsonBuilder().serializeNulls().create();
 
     final private DocumentSchema documentQuery = new RedisDocumentQuery();
 
@@ -64,10 +62,11 @@ public class Rest<T extends AbstractStorage> {
     }
 
     private void routes() {
-        // Documentation
+        // list of accessible routes
         get("/explain", ((request, response) -> {
+            response.type("application/json");
             return getRoutes();
-        }));
+        }), gson::toJson);
 
         get(RouteDoc, (request, response) -> storage.getDocs(request.params(":id").split(",")), gson::toJson);
 
@@ -91,7 +90,6 @@ public class Rest<T extends AbstractStorage> {
         get(RouteSetOperation, (request, response) -> {
             final String[] elements = request.params(":text").split(",");
             final String type = request.params(":type");
-            System.out.println(String.join(",", elements));
 
             switch (request.params(":operator")) {
                 case "union":
@@ -104,16 +102,10 @@ public class Rest<T extends AbstractStorage> {
         }, gson::toJson);
 
         get(RouteQueryDoc, (request, response) -> {
-            //{ document(id: [102154,1039887,1021125]) { id title token { text } } }
             final String query = java.net.URLDecoder.decode(request.params(":query"), "UTF-8");
             response.type("application/json");
 
-            ExecutionPlan<ExecutionResult, HashMap<String, String>> plan = queryManager.execute(documentQuery, query);
-
-            //System.out.println(query);
-            //System.out.println(plan.result.getErrors());
-
-            return plan;
+            return queryManager.execute(documentQuery, query).toMap();
         }, gson::toJson);
     }
 
@@ -132,7 +124,6 @@ public class Rest<T extends AbstractStorage> {
         List<String> routeFields = new ArrayList<>();
 
         for (Field field : declaredFields) {
-            System.out.println(field.getName());
             try {
                 if (field.getName().startsWith("Route")) {
                     routeFields.add((String) field.get(field));

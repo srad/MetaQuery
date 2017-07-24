@@ -5,8 +5,9 @@ import java.util.HashMap;
 /**
  * Contains the execution time, query and the resultSet of a query and maybe some additional meta
  * data about a query as the application evolves.
- *
+ * <p>
  * Result that is returned from {@link AbstractQueryExecutor#execute(String)} method.
+ *
  * @param <T>
  */
 final public class ExecutionPlan<T, U> {
@@ -41,18 +42,19 @@ final public class ExecutionPlan<T, U> {
 
     /**
      * Only expose selected fields as data that shall be passed around.
+     *
      * @param isCached
      * @return
      */
     public HashMap<String, Object> toMap(boolean isCached) {
-        return new HashMap<String, Object>() {{
-            put("resultSet", resultSet);
-            put("time", time);
-            put("query", query);
-            put("iterations", iterations);
-            put("isCached", isCached());
-            put("cacheFetchTime", getCacheFetchTime());
-        }};
+        HashMap map = new HashMap<String, Object>();
+        map.put("resultSet", resultSet);
+        map.put("time", time);
+        map.put("query", query);
+        map.put("iterations", iterations);
+        map.put("isCached", isCached);
+        map.put("cacheFetchTime", getCacheFetchTime());
+        return map;
     }
 
     public long getCacheFetchTime() {
