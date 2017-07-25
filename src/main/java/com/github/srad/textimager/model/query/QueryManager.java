@@ -1,15 +1,25 @@
 package com.github.srad.textimager.model.query;
 
+import com.github.srad.textimager.storage.AbstractStorage;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Container for caching and other upcoming thing.
  * Manages the cached queries right now.
  */
-public class QueryManager {
-    private ConcurrentHashMap<String, ExecutionPlan> cachedQueries = new ConcurrentHashMap<>();
+public class QueryManager<ExecutorType extends AbstractQueryExecutor, StorageType extends AbstractStorage> {
+    private final ExecutorType executor;
+    private final ConcurrentHashMap<String, ExecutionPlan> cachedQueries = new ConcurrentHashMap<>();
 
-    public ExecutionPlan execute(AbstractQueryExecutor executor, String query) {
+    public QueryManager(Class<ExecutorType> executorType, Class<StorageType> storageType) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        // getConstructor(storageType).newInstance(storageType) raises an error
+        // although the compiler correctly inserts the types.
+        this.executor = (ExecutorType) executorType.getConstructors()[0].newInstance(storageType);
+    }
+
+    public ExecutionPlan execute(String query) {
         if (cachedQueries.containsKey(query)) {
             long startTime = System.currentTimeMillis();
 
@@ -27,7 +37,15 @@ public class QueryManager {
         return plan;
     }
 
+    public AbstractStorage getStorage() {
+        return executor.storage;
+    }
+
     public void purge() {
         cachedQueries.clear();
+    }
+
+    public void stop() {
+        executor.storage.close();
     }
 }

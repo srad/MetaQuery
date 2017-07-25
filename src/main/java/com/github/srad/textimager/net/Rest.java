@@ -41,14 +41,10 @@ public class Rest<ExecutorType extends AbstractQueryExecutor, StorageType extend
 
     final private static Gson gson = new GsonBuilder().serializeNulls().create();
 
-    final private ExecutorType executor;
-
-    final private QueryManager<ExecutorType, StorageType> queryManager = new QueryManager();
+    final private QueryManager<ExecutorType, StorageType> queryManager;
 
     public Rest(Class<ExecutorType> executorType, Class<StorageType> storageType) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        // getConstructor(storageType).newInstance(storageType) raises an error
-        // although the compiler correctly inserts the types.
-        this.executor = (ExecutorType) executorType.getConstructors()[0].newInstance(storageType);
+        this.queryManager = new QueryManager<>(executorType, storageType);
     }
 
     public void start() {
@@ -83,15 +79,15 @@ public class Rest<ExecutorType extends AbstractQueryExecutor, StorageType extend
             return getRoutes();
         }), gson::toJson);
 
-        get(RouteDoc, (request, response) -> executor.storage.getDocs(request.params(":id").split(",")), gson::toJson);
+        get(RouteDoc, (request, response) -> queryManager.getStorage().getDocs(request.params(":id").split(",")), gson::toJson);
 
-        get(RouteSetCard, (request, response) -> executor.storage.scard(request.params(":type"), request.params(":text")));
+        get(RouteSetCard, (request, response) -> queryManager.getStorage().scard(request.params(":type"), request.params(":text")));
 
         get(RoutePaginateDocIdAndTitle, (request, response) -> {
             final int offset = Integer.valueOf(request.params(":offset"));
             final Long limit = Long.valueOf(request.params(":limit"));
 
-            return executor.storage.paginateTitles(offset, limit);
+            return queryManager.getStorage().paginateTitles(offset, limit);
         }, gson::toJson);
 
         get(RoutePaginateDocIdTypes, ((request, response) -> {
@@ -99,7 +95,7 @@ public class Rest<ExecutorType extends AbstractQueryExecutor, StorageType extend
             final String type = request.params(":type");
             final Long limit = Long.valueOf(request.params(":limit"));
 
-            return executor.storage.unionScoredTypes(ids, type, limit);
+            return queryManager.getStorage().unionScoredTypes(ids, type, limit);
         }), gson::toJson);
 
         get(RouteSetOperation, (request, response) -> {
@@ -108,9 +104,9 @@ public class Rest<ExecutorType extends AbstractQueryExecutor, StorageType extend
 
             switch (request.params(":operator")) {
                 case "union":
-                    return executor.storage.unionSet(type, elements);
+                    return queryManager.getStorage().unionSet(type, elements);
                 case "intersect":
-                    return executor.storage.intersectSet(type, elements);
+                    return queryManager.getStorage().intersectSet(type, elements);
                 default:
                     throw new Exception("Operation not allowed");
             }
@@ -120,12 +116,12 @@ public class Rest<ExecutorType extends AbstractQueryExecutor, StorageType extend
             final String query = java.net.URLDecoder.decode(request.params(":query"), "UTF-8");
             response.type("application/json");
 
-            return queryManager.execute(executor, query).toMap();
+            return queryManager.execute(query).toMap();
         }, gson::toJson);
     }
 
     public void stop() {
-        executor.storage.close();
+        queryManager.stop();
         SparkBase.stop();
     }
 
