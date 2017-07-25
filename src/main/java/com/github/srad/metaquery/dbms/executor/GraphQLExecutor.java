@@ -1,6 +1,6 @@
 package com.github.srad.metaquery.dbms.executor;
 
-import com.github.srad.metaquery.dbms.storage.Key;
+import com.github.srad.metaquery.dbms.storage.redis.Key;
 import com.github.srad.metaquery.model.Document;
 import com.github.srad.metaquery.reader.type.ElementType;
 import com.github.srad.metaquery.reader.type.Token;

@@ -10,7 +10,6 @@ import com.lambdaworks.redis.api.async.RedisSetAsyncCommands;
 import com.lambdaworks.redis.api.async.RedisSortedSetAsyncCommands;
 import com.lambdaworks.redis.api.sync.RedisServerCommands;
 import com.github.srad.metaquery.dbms.storage.AbstractConsumer;
-import com.github.srad.metaquery.dbms.storage.Key;
 import com.github.srad.metaquery.dbms.storage.type.AbstractStorageCommand;
 
 import java.util.ArrayList;

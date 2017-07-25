@@ -1,4 +1,4 @@
-package com.github.srad.metaquery.dbms.storage;
+package com.github.srad.metaquery.dbms.storage.redis;
 
 import com.github.srad.metaquery.reader.type.ElementType;
 

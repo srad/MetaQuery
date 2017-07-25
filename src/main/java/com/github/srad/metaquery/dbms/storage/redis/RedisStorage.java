@@ -9,7 +9,6 @@ import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands;
 import com.lambdaworks.redis.api.async.RedisSetAsyncCommands;
-import com.github.srad.metaquery.dbms.storage.Key;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

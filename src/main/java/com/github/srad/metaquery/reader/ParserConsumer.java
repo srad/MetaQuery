@@ -3,7 +3,7 @@ package com.github.srad.metaquery.reader;
 import com.github.srad.metaquery.reader.type.Char;
 import com.github.srad.metaquery.reader.type.ElementType;
 import com.github.srad.metaquery.dbms.storage.type.*;
-import com.github.srad.metaquery.dbms.storage.Key;
+import com.github.srad.metaquery.dbms.storage.redis.Key;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
