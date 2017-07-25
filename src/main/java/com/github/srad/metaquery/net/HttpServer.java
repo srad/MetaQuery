@@ -1,6 +1,8 @@
 package com.github.srad.metaquery.net;
 
-import com.github.srad.metaquery.MetaQueryConfig;
+import com.github.srad.metaquery.CasImporter;
+import com.github.srad.metaquery.CasImporterConfig;
+import com.github.srad.metaquery.dbms.ExecutionPlan;
 import com.github.srad.metaquery.dbms.QueryManager;
 import com.github.srad.metaquery.dbms.executor.AbstractQueryExecutor;
 import com.github.srad.metaquery.dbms.storage.AbstractStorage;
@@ -8,9 +10,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import spark.SparkBase;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static spark.Spark.*;
@@ -32,12 +36,13 @@ import static spark.Spark.*;
  */
 public class HttpServer<ExecutorType extends AbstractQueryExecutor, StorageType extends AbstractStorage> {
 
-    final public static String RouteQueryDoc = "/doc/query/:query";
+    final public static String RouteQueryDoc = "/query/execute";
     final public static String RouteDoc = "/doc/:id";
     final public static String RoutePaginateDocIdTypes = "/doc/:id/:type/:limit";
     final public static String RoutePaginateDocIdAndTitle = "/doc/title/:limit/:offset";
     final public static String RouteSetOperation = "/set/:operator/:type/:text";
     final public static String RouteSetCard = "/set/card/:type/:text";
+    final public static String RouteStartImport = "/service/import/start";
 
     final private static Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -48,7 +53,7 @@ public class HttpServer<ExecutorType extends AbstractQueryExecutor, StorageType 
     }
 
     public void start() {
-        SparkBase.port(MetaQueryConfig.WebServerPort);
+        SparkBase.port(CasImporterConfig.WebServerPort);
         config();
         routes();
     }
@@ -81,7 +86,7 @@ public class HttpServer<ExecutorType extends AbstractQueryExecutor, StorageType 
 
         get(RouteDoc, (request, response) -> queryManager.getStorage().getDocs(request.params(":id").split(",")), gson::toJson);
 
-        get(RouteSetCard, (request, response) -> queryManager.getStorage().scard(request.params(":type"), request.params(":text")));
+        get(RouteSetCard, (request, response) -> queryManager.getStorage().setCardinality(request.params(":type"), request.params(":text")));
 
         get(RoutePaginateDocIdAndTitle, (request, response) -> {
             final int offset = Integer.valueOf(request.params(":offset"));
@@ -112,16 +117,32 @@ public class HttpServer<ExecutorType extends AbstractQueryExecutor, StorageType 
             }
         }, gson::toJson);
 
-        get(RouteQueryDoc, (request, response) -> {
-            final String query = java.net.URLDecoder.decode(request.params(":query"), "UTF-8");
+        post(RouteQueryDoc, (request, response) -> {
+            final String query = request.body();
             response.type("application/json");
 
-            return queryManager.execute(query).toMap();
+            ExecutionPlan plan = queryManager.execute(query);
+            HashMap map = plan.toMap();
+            System.out.println(map);
+
+            return map;
         }, gson::toJson);
+
+        post(RouteStartImport, (request, response) -> {
+            System.out.println("starting import");
+            startImport();
+            return "";
+        });
+    }
+
+    private void startImport() throws IOException, InterruptedException {
+        String importFolder = "/home/saman/Downloads/bio";
+        final CasImporter casImporter = new CasImporter(new CasImporterConfig(importFolder));
+        casImporter.start();
     }
 
     public void stop() {
-        queryManager.stop();
+        queryManager.shutdown();
         SparkBase.stop();
     }
 

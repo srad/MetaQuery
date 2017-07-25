@@ -1,5 +1,6 @@
 package com.github.srad.metaquery.dbms.executor;
 
+import com.github.srad.metaquery.dbms.storage.Key;
 import com.github.srad.metaquery.model.Document;
 import com.github.srad.metaquery.reader.type.ElementType;
 import com.github.srad.metaquery.reader.type.Token;
@@ -20,6 +21,8 @@ import static graphql.schema.GraphQLObjectType.newObject;
 public class GraphQLExecutor<StorageType extends AbstractStorage> extends AbstractQueryExecutor<ExecutionResult, HashMap<String, String>, StorageType> {
 
     private GraphQL graph;
+
+    private HashMap<String, Object> cache = new HashMap<>();
 
     public GraphQLExecutor(Class<StorageType> storage) throws InstantiationException, IllegalAccessException {
         super(storage);
@@ -57,8 +60,21 @@ public class GraphQLExecutor<StorageType extends AbstractStorage> extends Abstra
                         .dataFetcher(env -> fetch(() -> fetchElementTypeIds(env, Token.class))))
                 .build();
 
+        GraphQLObjectType countType = GraphQLObjectType.newObject()
+                .name("count")
+                .field(newFieldDefinition()
+                    .name("document")
+                    .type(GraphQLString)
+                    .dataFetcher(env -> fetch(() -> count())))
+                .build();
+
         GraphQLObjectType root = GraphQLObjectType.newObject()
                 .name("query")
+                .field(GraphQLFieldDefinition.newFieldDefinition()
+                        .name("count")
+                        .type(countType)
+                        .dataFetcher(env -> new String[] { "document" })
+                        .build())
                 .field(GraphQLFieldDefinition.newFieldDefinition()
                         .name("document")
                         .type(new GraphQLList(docType))
@@ -85,6 +101,16 @@ public class GraphQLExecutor<StorageType extends AbstractStorage> extends Abstra
         graph = GraphQL.newGraphQL(schema).build();
     }
 
+    private String count() {
+        try {
+            System.out.println("count");
+            return storage.getDocCount();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return "null";
+        }
+    }
+
     private String[][] fetchElementTypeIds(DataFetchingEnvironment env, Class<? extends ElementType> type) {
         try {
             Document doc = env.getSource();
@@ -106,8 +132,16 @@ public class GraphQLExecutor<StorageType extends AbstractStorage> extends Abstra
 
     private String getElementField(DataFetchingEnvironment env, String field, Class<? extends ElementType> type) {
         String[] docIdAndElementId = env.getSource();
+        String hashFieldKey = Key.create(docIdAndElementId[1], field);
         try {
-            return storage.getElement(docIdAndElementId[0], docIdAndElementId[1], field, type);
+            if (!cache.containsKey(type.getSimpleName())) {
+                Map<String, String> allElements = storage.getElements(docIdAndElementId[0], type);
+                cache.put(type.getSimpleName(), allElements);
+            } else {
+                System.out.println("Lookup: " + hashFieldKey);
+            }
+            Map<String, String> fields = (Map)cache.get(type.getSimpleName());
+            return fields.get(hashFieldKey);
         } catch (Exception e2) {
             return e2.getMessage();
         }

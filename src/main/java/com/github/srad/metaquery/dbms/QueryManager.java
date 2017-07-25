@@ -46,7 +46,7 @@ public class QueryManager<ExecutorType extends AbstractQueryExecutor, StorageTyp
         cachedQueries.clear();
     }
 
-    public void stop() {
+    public void shutdown() {
         executor.storage.close();
     }
 }

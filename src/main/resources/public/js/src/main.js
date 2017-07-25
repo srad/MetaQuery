@@ -10,51 +10,51 @@ require([
 ], function ($, ko, JSONEditor) {
     "use strict";
 
-    var $executeBtn = $("#execute");
-
-    function ViewModelQueryPlan() {
-        this.time = ko.observable("");
-        this.isCached = ko.observable("");
-        this.cacheFetchTime = ko.observable("");
-        this.iterations = ko.observable("");
-    }
-
-    var queryPlan = new ViewModelQueryPlan();
-
-    ko.applyBindings(queryPlan, document.getElementById("queryPlan"));
-
-    $(function () {
+    function AppViewModel() {
+        var that = this;
         var editor = new JSONEditor(document.getElementById("response"), {
             mode: "view"
         });
 
-        document.getElementById("query").value = [
+        this.time = ko.observable("");
+        this.isCached = ko.observable("");
+        this.cacheFetchTime = ko.observable("");
+        this.iterations = ko.observable("");
+
+        this.query = ko.observable([
             "{",
             "  document(id: [102154,1039887,1021125]) {",
             "    id title token {",
             "      text begin end",
             "    }",
             "  }",
-            "}"].join("\n");
+            "}"].join("\n"));
 
-        $executeBtn.on("click", function () {
-            $executeBtn.addClass("loading");
-
-            $.getJSON("/doc/query/" + encodeURIComponent($("#query").val()), function (response) {
+        this.executeQuery = function () {
+            var $executeBtn = $(this).addClass("loading");
+            $.post("/query/execute", that.query(), function (response) {
                 if (response !== null) {
-                    queryPlan.time(response.time + "ms");
-                    queryPlan.isCached(response.isCached);
-                    queryPlan.cacheFetchTime(response.cacheFetchTime + "ms");
-                    queryPlan.iterations(response.iterations);
+                    that.time(response.time + "ms");
+                    that.isCached(response.isCached);
+                    that.cacheFetchTime(response.cacheFetchTime + "ms");
+                    that.iterations(response.iterations);
                     editor.set(response.resultSet);
                 } else {
-                    queryPlan.time("");
-                    queryPlan.isCached("");
-                    queryPlan.cacheFetchTime("");
+                    that.time("");
+                    that.isCached("");
+                    that.cacheFetchTime("");
                     editor.set("");
                 }
                 $executeBtn.removeClass("loading");
             });
-        });
+        };
+
+        this.startImport = function () {
+            $.post("/service/import/start");
+        };
+    }
+
+    $(function () {
+        ko.applyBindings(new AppViewModel());
     });
 });

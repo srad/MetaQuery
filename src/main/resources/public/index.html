@@ -31,7 +31,7 @@
             <form>
                 <div class="form-group">
                     <label class="form-label">Query</label>
-                    <textarea class="results" id="query"></textarea>
+                    <textarea class="results" data-bind="value: query"></textarea>
                 </div>
             </form>
         </div>
@@ -80,8 +80,11 @@
     <div class="divider"></div>
 
     <div class="columns">
-        <div class="column col-12">
-            <button id="execute" class="btn btn-primary btn-lg">Execute <i class="icon icon-check"></i></button>
+        <div class="column col-2">
+            <button data-bind="event: { click: executeQuery }" class="btn btn-primary btn-block btn-lg">Execute <i class="icon icon-check"></i></button>
+        </div>
+        <div class="column col-2">
+            <button data-bind="event: {click: startImport}" class="btn btn-primary btn-block btn-lg">Start import</button>
         </div>
     </div>
 </div>

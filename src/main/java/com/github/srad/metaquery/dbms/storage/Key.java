@@ -40,7 +40,11 @@ public class Key {
         return create("doc", documentId, "set", type.getSimpleName());
     }
 
-    public static String elementType(String documentId, String elementId, Class<? extends ElementType> type) {
-        return create("doc", documentId, "element", type.getSimpleName(), elementId);
+    public static String elementOfType(String documentId, Class<? extends ElementType> type) {
+        return create("doc", documentId, "element", type.getSimpleName());
+    }
+
+    public static String docCount() {
+        return create("doc", "count", "total");
     }
 }

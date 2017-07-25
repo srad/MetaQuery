@@ -1,6 +1,6 @@
 package com.github.srad.metaquery.dbms.storage.redis;
 
-import com.github.srad.metaquery.MetaQueryConfig;
+import com.github.srad.metaquery.CasImporterConfig;
 import com.github.srad.metaquery.model.Document;
 import com.github.srad.metaquery.model.Token;
 import com.github.srad.metaquery.reader.type.ElementType;
@@ -26,7 +26,12 @@ public class RedisStorage extends AbstractStorage {
     }
 
     public static RedisClient createClient() {
-        return RedisClient.create(new RedisURI("localhost", MetaQueryConfig.ArdbPort, 10, TimeUnit.MINUTES));
+        return RedisClient.create(new RedisURI("localhost", CasImporterConfig.ArdbPort, 10, TimeUnit.MINUTES));
+    }
+
+    @Override
+    public String engineName() {
+        return "Redis driver compatible server";
     }
 
     @Override
@@ -118,20 +123,32 @@ public class RedisStorage extends AbstractStorage {
     }
 
     @Override
-    public Long scard(String type, String text) throws ExecutionException, InterruptedException {
+    public Long setCardinality(String type, String text) throws ExecutionException, InterruptedException {
         return (Long) connection.async().scard(Key.create("set", "union", type, text)).get();
     }
 
     @Override
     public String getElement(String documentId, String elementId, String elementKey, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
         RedisHashAsyncCommands<String, String> cmd = connection.async();
-        return cmd.hget(Key.elementType(documentId, elementId, type), elementKey).get();
+        // nested set doc:[id]:element:[type] => ([element.id]:id, [element.id]:text, ...)
+        return cmd.hget(Key.elementOfType(documentId, type), Key.create(elementId, elementKey)).get();
+    }
+
+    @Override
+    public Map<String, String> getElements(String documentId, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
+        RedisHashAsyncCommands<String, String> cmd = connection.async();
+        return cmd.hgetall(Key.elementOfType(documentId, type)).get();
     }
 
     @Override
     public Set<String> getElementIds(String documentId, Class<? extends ElementType> type) throws ExecutionException, InterruptedException {
         RedisSetAsyncCommands<String, String> cmd = connection.async();
         return cmd.smembers(Key.elementTypeIdSet(documentId, type)).get();
+    }
+
+    @Override
+    public String getDocCount() throws Exception {
+        return (String)connection.async().get(Key.docCount()).get();
     }
 
     @Override

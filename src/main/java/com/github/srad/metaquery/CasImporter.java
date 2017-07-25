@@ -23,23 +23,32 @@ import java.util.concurrent.*;
  * into the storageQueue which then consumes these object and sends it to a database.</li>
  * </ol>
  */
-public class MetaQuery {
+final public class CasImporter {
 
-    public MetaQuery(MetaQueryConfig config) throws IOException, InterruptedException {
-        final ArrayBlockingQueue<AbstractParser> parserQueue = new ArrayBlockingQueue<>(500);
-        final ArrayBlockingQueue<AbstractStorageCommand> storageQueue = new ArrayBlockingQueue<>(500);
+    final private CasImporterConfig config;
 
-        final ExecutorService executor = Executors.newCachedThreadPool();
+    final private ArrayBlockingQueue<AbstractParser> parserQueue = new ArrayBlockingQueue<>(100);
+    final private ArrayBlockingQueue<AbstractStorageCommand> storageQueue = new ArrayBlockingQueue<>(100);
 
-        // You might want to reduce the {@link MetaQueryConfig} threadCount property,
+    final ExecutorService executor = Executors.newCachedThreadPool();
+
+    public CasImporter(CasImporterConfig config) {
+        this.config = config;
+    }
+
+    public void start() throws IOException, InterruptedException {
+        parserQueue.clear();
+        storageQueue.clear();
+
+        // You might want to reduce the {@link CasImporterConfig} threadCount property,
         // since we start two threads per available hardware (hyper)thread
         for (int i = 0; i < config.threadCount; i += 1) {
             executor.execute(new StorageConsumer(storageQueue));
             executor.execute(new ParserConsumer(parserQueue, storageQueue));
         }
 
-        Thread parserThread = new Thread(new ParserProducer(new ParserConfig(parserQueue, config), file -> true));
-        long start = System.currentTimeMillis();
+        final Thread parserThread = new Thread(new ParserProducer(new ParserConfig(parserQueue, config), file -> true));
+        final long start = System.currentTimeMillis();
 
         parserThread.start();
         parserThread.join();
@@ -52,14 +61,19 @@ public class MetaQuery {
         executor.shutdown();
         executor.awaitTermination(10L, TimeUnit.MINUTES);
 
-        long end = System.currentTimeMillis();
+        final long end = System.currentTimeMillis();
 
         // log results
-        String log = String.format("%s: Thread-count: %s, File-count: %s, Elapsed time: %ss\n", LocalDateTime.now(), config.threadCount, config.documentLimit, (end - start) / 1000);
+        final String log = String.format("%s: Thread-count: %s, File-count: %s, Elapsed time: %ss\n", LocalDateTime.now(), config.threadCount, config.documentLimit, (end - start) / 1000);
 
-        Path path = Paths.get("./thread.log");
+        final Path path = Paths.get("./thread.log");
         Files.write(path, log.getBytes(), (Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE));
 
         System.out.println(log);
+    }
+
+    public void stop() {
+        executor.shutdownNow();
+        System.out.println("Executor.shutdown: " + executor.isShutdown());
     }
 }
