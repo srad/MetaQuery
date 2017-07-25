@@ -1,5 +1,6 @@
 package com.github.srad.textimager;
 
+import com.github.srad.textimager.model.graphql.GraphQLExecutor;
 import com.github.srad.textimager.net.Rest;
 import com.github.srad.textimager.storage.redis.RedisStorage;
 
@@ -7,7 +8,7 @@ public class main {
 
     private static CasImporter app;
 
-    private static Rest server;
+    private static Rest<GraphQLExecutor, RedisStorage> server;
 
     final private static boolean startServer = true;
 
@@ -21,7 +22,7 @@ public class main {
             }
 
             if (startServer) {
-                server = new Rest(RedisStorage.class);
+                server = new Rest<>(GraphQLExecutor.class, RedisStorage.class);
                 server.start();
             }
 
@@ -29,8 +30,9 @@ public class main {
                 app = new CasImporter(new CasImporterConfig(importFolder));
             }
         } catch (Exception e) {
-            server.stop();
+            System.out.println(e.getMessage());
             e.printStackTrace();
+            server.stop();
             System.exit(1);
         }
     }

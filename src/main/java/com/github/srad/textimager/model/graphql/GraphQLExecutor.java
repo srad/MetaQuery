@@ -4,11 +4,12 @@ import com.github.srad.textimager.model.query.AbstractQueryExecutor;
 import com.github.srad.textimager.model.type.Document;
 import com.github.srad.textimager.reader.type.ElementType;
 import com.github.srad.textimager.reader.type.Token;
-import com.github.srad.textimager.storage.redis.RedisStorage;
+import com.github.srad.textimager.storage.AbstractStorage;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.language.Field;
 import graphql.schema.*;
+
 import java.util.*;
 
 import static graphql.Scalars.GraphQLID;
@@ -17,13 +18,13 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
-abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResult, HashMap<String, String>> {
+public class GraphQLExecutor<StorageType extends AbstractStorage> extends AbstractQueryExecutor<ExecutionResult, HashMap<String, String>, StorageType> {
 
     private GraphQL graph;
 
-    protected RedisStorage service = new RedisStorage();
+    public GraphQLExecutor(Class<StorageType> storage) throws InstantiationException, IllegalAccessException {
+        super(storage);
 
-    public DocumentSchema() {
         GraphQLObjectType tokenType = GraphQLObjectType.newObject()
                 .name("token")
                 .field(newFieldDefinition()
@@ -54,23 +55,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
                 .field(newFieldDefinition()
                         .name("token")
                         .type(new GraphQLList(tokenType))
-                        .dataFetcher(env -> fetch(() -> {
-                            try {
-                                Document doc = (Document) env.getSource();
-                                Set<String> ids = service.getElementIds(doc.getId(), com.github.srad.textimager.reader.type.Token.class);
-                                String[][] entries = new String[ids.size()][2];
-                                int i = 0;
-
-                                for(String id: ids) {
-                                    entries[i] = new String[]{doc.getId(), id};
-                                    i += 1;
-                                }
-
-                                return entries;
-                            } catch (Exception e) {
-                                return e.getMessage();
-                            }
-                        })))
+                        .dataFetcher(env -> fetch(() -> fetchElementTypeIds(env, Token.class))))
                 .build();
 
         GraphQLObjectType root = GraphQLObjectType.newObject()
@@ -101,10 +86,29 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
         graph = GraphQL.newGraphQL(schema).build();
     }
 
+    private String[][] fetchElementTypeIds(DataFetchingEnvironment env, Class<? extends ElementType> type) {
+        try {
+            Document doc = env.getSource();
+            Set<String> ids = storage.getElementIds(doc.getId(), type);
+            // for each element.id: element.id => (doc.id, element.id)
+            String[][] entries = new String[ids.size()][2];
+            int i = 0;
+
+            for (String id : ids) {
+                entries[i] = new String[]{doc.getId(), id};
+                i += 1;
+            }
+
+            return entries;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private String getElementField(DataFetchingEnvironment env, String field, Class<? extends ElementType> type) {
         String[] docIdAndElementId = env.getSource();
         try {
-            return service.getElement(docIdAndElementId[0], docIdAndElementId[1], field, type);
+            return storage.getElement(docIdAndElementId[0], docIdAndElementId[1], field, type);
         } catch (Exception e2) {
             return e2.getMessage();
         }
@@ -130,14 +134,12 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
             List<String> idList = env.getArgument("id");
             String[] idArray = idList.stream().toArray(String[]::new);
 
-            return getDocuments(idArray);
+            return storage.getDocs(idArray);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-
-    abstract protected List<Document> getDocuments(String[] ids);
 
     @Override
     protected ExecutionResult executeImplementation(String query) {
@@ -145,7 +147,7 @@ abstract public class DocumentSchema extends AbstractQueryExecutor<ExecutionResu
     }
 
     @Override
-    protected HashMap<String, String> getResultSet(ExecutionResult result) {
+    protected HashMap<String, String> fetchResultSet(ExecutionResult result) {
         return result.getData();
     }
 }
