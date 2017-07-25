@@ -8,11 +8,11 @@ import java.util.HashMap;
  * <p>
  * Result that is returned from {@link AbstractQueryExecutor#execute(String)} method.
  *
- * @param <T>
+ * @param <ResultType>
  */
-final public class ExecutionPlan<T, U> {
-    final public T result;
-    final public U resultSet;
+final public class ExecutionPlan<ResultType, ResultSetType> {
+    final public ResultType result;
+    final public ResultSetType resultSet;
     final public String query;
     final public long iterations;
     public long time;
@@ -23,12 +23,12 @@ final public class ExecutionPlan<T, U> {
         return isCached;
     }
 
-    public ExecutionPlan<T, U> setCached(boolean cached) {
+    public ExecutionPlan<ResultType, ResultSetType> setCached(boolean cached) {
         isCached = cached;
         return this;
     }
 
-    public ExecutionPlan(final T result, final long time, final String query, final U resultSet, final long iterations) {
+    public ExecutionPlan(final ResultType result, final long time, final String query, final ResultSetType resultSet, final long iterations) {
         this.result = result;
         this.time = time;
         this.query = query;
