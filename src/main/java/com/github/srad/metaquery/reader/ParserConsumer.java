@@ -30,7 +30,7 @@ public class ParserConsumer implements Runnable {
         while (true) {
             // Parse page as a whole or not at all
             try {
-                AbstractParser parser = queue.take();
+                final AbstractParser parser = queue.take();
 
                 if (parser.isPoisonPill()) {
                     break;
@@ -51,16 +51,16 @@ public class ParserConsumer implements Runnable {
 
                     // Add all elements to a set
                     if (!classType.getSimpleName().equals(Char.class.getSimpleName())) {
-                        ConcurrentMap<String, List<ElementType>> groupedByTextWithElements = elements.collect(Collectors.groupingByConcurrent(ElementType::getText));
+                        final ConcurrentMap<String, List<ElementType>> groupedByTextWithElements = elements.collect(Collectors.groupingByConcurrent(ElementType::getText));
                         groupedByTextWithElements.forEach((string, list) -> {
                             list.forEach(elementInList -> {
                                 final String setOfIdsOfType = Key.create("doc", parser.getDocumentId(), "set", typeName);
-                                final String singleElementTypeData = Key.create("doc", parser.getDocumentId(), "element", typeName, elementInList.id);
+                                final String singleElementTypeData = Key.create("doc", parser.getDocumentId(), "element", typeName);
                                 try {
                                     storageQueue.put(new SetAddCommand(setOfIdsOfType, elementInList.id));
-                                    storageQueue.put(new MapCommand(singleElementTypeData, elementInList.toMap()));
+                                    storageQueue.put(new MapCommand(singleElementTypeData, elementInList.toMap(elementInList.id + ":")));
                                 } catch (InterruptedException e) {
-                                    e.printStackTrace();
+                                    System.out.println(e.getMessage());
                                 }
                             });
                         });
@@ -74,6 +74,7 @@ public class ParserConsumer implements Runnable {
                         .filter(e -> (!e.getClass().equals(Char.class)))
                         .forEach(el -> {
                             try {
+                                // union-set of all doc-ids which contain this element-type.
                                 storageQueue.put(new SetAddCommand(Key.createUnionElementType(el.getTypeName(), el.getText()), parser.getDocumentId()));
                                 //storageQueue.put(new MapCommand<>(Key.create("doc", parser.getDocumentId(), el.getTypeName(), el.id), el.toMap()));
                             } catch (Exception e) {

@@ -11,4 +11,12 @@ final public class Lemma extends ElementType {
     public static QName getElementInfo() {
         return new QName("http:///de/tudarmstadt/ukp/dkpro/core/api/segmentation/type.ecore", "Lemma");
     }
+
+    @Override
+    public HashMap<String, String> toMap(String keyPrefix) {
+        HashMap map = super.toMap(keyPrefix);
+        map.put(keyPrefix + "value", attr.get("value"));
+
+        return map;
+    }
 }

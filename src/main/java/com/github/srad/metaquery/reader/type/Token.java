@@ -2,7 +2,6 @@ package com.github.srad.metaquery.reader.type;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
-import java.util.Map;
 
 final public class Token extends ElementType {
 
@@ -18,12 +17,12 @@ final public class Token extends ElementType {
     }
 
     @Override
-    public Map<String, String> toMap() {
-        Map map = super.toMap();
+    public HashMap<String, String> toMap(final String keyPrefix) {
+        HashMap map = super.toMap(keyPrefix);
 
-        map.put("morph", morph);
-        map.put("lemma", lemma);
-        map.put("pos", pos);
+        map.put(keyPrefix + "morph", morph);
+        map.put(keyPrefix +"lemma", lemma);
+        map.put(keyPrefix +"pos", pos);
 
         return map;
     }

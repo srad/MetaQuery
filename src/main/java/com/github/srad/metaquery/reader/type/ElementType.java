@@ -19,7 +19,9 @@ abstract public class ElementType {
 
     final Gson gson = new Gson();
 
-    /** Lazy */
+    /**
+     * Lazy
+     */
     private String extractedText = null;
 
     public ElementType(final Sofa sofa, final HashMap<String, String> attr) {
@@ -37,30 +39,45 @@ abstract public class ElementType {
         return extractedText;
     }
 
-    public String getName() { return this.getClass().getSimpleName(); }
+    public String getName() {
+        return this.getClass().getSimpleName();
+    }
 
-    public String getNormalizedText() { return getText().toLowerCase(); }
+    public String getNormalizedText() {
+        return getText().toLowerCase();
+    }
 
     public String getTextWithType() {
         return String.format("%s%s%s", getClass().getSimpleName(), TypeSeparator, getNormalizedText());
     }
 
-    public String getTypeName() { return getClass().getSimpleName(); }
+    public String getTypeName() {
+        return getClass().getSimpleName();
+    }
 
     @Override
-    public String toString() { return String.format("%s(id: %s, text: %s, begin: %s, end: %s)", getName(), id, getText(), begin, end); }
+    public String toString() {
+        return String.format("%s(id: %s, text: %s, begin: %s, end: %s)", getName(), id, getText(), begin, end);
+    }
 
-    public static QName getElementInfo() { throw new NotImplementedException(); }
+    public static QName getElementInfo() {
+        throw new NotImplementedException();
+    }
 
-    public Map<String, String> toMap() {
+    public HashMap<String, String> toMap() {
+        return toMap("");
+    }
+
+    public HashMap<String, String> toMap(final String keyPrefix) {
         // getId is lazy, becase the sofa element occurs late in xml stream
-        return new HashMap<String, String>()  {{
-            put("sofa", sofa.getId());
-            put("id", attr.get("id"));
-            put("begin", attr.get("begin"));
-            put("end", attr.get("end"));
-            put("text", getText());
-        }};
+        final HashMap<String, String> map = new HashMap<>();
+        //put(keyPrefix + "id", attr.get("id"));
+        //put(keyPrefix + "sofa", sofa.getId());
+        map.put(keyPrefix + "begin", attr.get("begin"));
+        map.put(keyPrefix + "end", attr.get("end"));
+        map.put(keyPrefix + "text", getText());
+
+        return map;
     }
 
     public String toJson() {
